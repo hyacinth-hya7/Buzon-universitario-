@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buzón Universitario Lila</title>
+    <style>
+        :root {
+            --lila-claro: #f3e5f5;
+            --lila-medio: #ce93d8;
+            --lila-oscuro: #8e24aa;
+            --blanco: #ffffff;
+            --texto: #4a148c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--lila-claro);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: var(--texto);
+        }
+
+        .container {
+            background: var(--blanco);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 { color: var(--lila-oscuro); text-align: center; margin-bottom: 25px; }
+
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; margin-bottom: 15px; }
+
+        label { display: block; margin-bottom: 5px; color: var(--lila-oscuro); font-weight: bold; font-size: 14px; }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--lila-medio);
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus, input:focus { border-color: var(--lila-oscuro); }
+
+        .upload-area {
+            border: 2px dashed var(--lila-medio);
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #faf5ff;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--lila-oscuro);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background-color: #6a1b9a; transform: translateY(-2px); }
+
+        /* Estilo de los Post */
+        #feed { margin-top: 40px; }
+        .post {
+            background: var(--blanco);
+            padding: 20px;
+            border-left: 6px solid var(--lila-oscuro);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(142, 36, 170, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        .post-header { font-size: 13px; color: var(--lila-oscuro); margin-bottom: 10px; border-bottom: 1px solid var(--lila-claro); padding-bottom: 5px; }
+        .post-type { background: var(--lila-oscuro); color: white; padding: 2px 8px; border-radius: 5px; margin-right: 10px; }
+        .post-content { font-size: 16px; margin: 10px 0; }
+        .post img, .post video { max-width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid var(--lila-medio); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💜 Buzón Universitario</h2>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label>Carrera</label>
+            <input type="text" id="carrera" placeholder="Ej: Psicología">
+        </div>
+        <div class="form-group">
+            <label>Semestre</label>
+            <select id="semestre">
+                <option value="1er Semestre">1°</option>
+                <option value="2do Semestre">2°</option>
+                <option value="3er Semestre">3°</option>
+                <option value="4to Semestre">4°</option>
+                <option value="5to Semestre">5°</option>
+                <option value="6to Semestre">6°</option>
+                <option value="7mo Semestre">7°</option>
+                <option value="8vo Semestre">8°</option>
+                <option value="9no Semestre">9°</option>
+                <option value="10mo Semestre">10°</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>¿Qué deseas enviar?</label>
+        <select id="tipo">
+            <option value="Opinión">Opinión 💬</option>
+            <option value="Sugerencia">Sugerencia 💡</option>
+            <option value="Queja">Queja ⚠️</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Tu mensaje</label>
+        <textarea id="mensaje" rows="4" placeholder="Escribe aquí tus opiniones o sugerencias..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Adjuntar multimedia</label>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <span id="fileName">📁 Seleccionar foto o video</span>
+            <input type="file" id="fileInput" hidden accept="image/*,video/*">
+        </div>
+    </div>
+
+    <button onclick="publicarComentario()">Publicar en el muro</button>
+
+    <div id="feed">
+        <!-- Los comentarios aparecerán aquí -->
+    </div>
+</div>
+
+<script>
+    function publicarComentario() {
+        const carrera = document.getElementById('carrera').value || "No especificada";
+        const semestre = document.getElementById('semestre').value;
+        const tipo = document.getElementById('tipo').value;
+        const mensaje = document.getElementById('mensaje').value;
+        const fileInput = document.getElementById('fileInput');
+        const feed = document.getElementById('feed');
+
+        if(mensaje.trim() === "") {
+            alert("Por favor, escribe un mensaje.");
+            return;
+        }
+
+        const post = document.createElement('div');
+        post.className = 'post';
+        
+        let multimediaHTML = '';
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const url = URL.createObjectURL(file);
+            
+            if (file.type.startsWith('image/')) {
+                multimediaHTML = `<img src="${url}">`;
+            } else if (file.type.startsWith('video/')) {
+                multimediaHTML = `<video controls src="${url}"></video>`;
+            }
+        }
+
+        post.innerHTML = `
+            <div class="post-header">
+                <span class="post-type">${tipo}</span> 
+                <strong>${carrera}</strong> • ${semestre}
+            </div>
+            <div class="post-content">${mensaje}</div>
+            ${multimediaHTML}
+            <small style="color:#aaa;">Enviado hoy</small>
+        `;
+
+        feed.prepend(post);
+
+        // Limpiar formulario
+        document.getElementById('mensaje').value = "";
+        document.getElementById('carrera').value = "";
+        document.getElementById('fileInput').value = "";
+        document.getElementById('fileName').innerText = "📁 Seleccionar foto o video";
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        const name = this.files[0] ? this.files[0].name : "📁 Seleccionar foto o video";
+        document.getElementById('fileName').innerText = name;
+    });
+</script>
+
+</body>
+</html>
