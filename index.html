@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buzón Universitario - Nicolle&Ina Oficial</title>
+    <style>
+        :root {
+            --vinotinto-oscuro: #64001D;
+            --vinotinto-medio: #800020;
+            --vinotinto-claro: #f8ecee;
+            --blanco: #ffffff;
+            --texto: #2d000a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--vinotinto-claro);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: var(--texto);
+        }
+
+        .container {
+            background: var(--blanco);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(100, 0, 29, 0.15);
+        }
+
+        h2 { color: var(--vinotinto-oscuro); text-align: center; margin-bottom: 25px; }
+
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; margin-bottom: 15px; }
+
+        label { display: block; margin-bottom: 5px; color: var(--vinotinto-oscuro); font-weight: bold; font-size: 14px; }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d8b4bc;
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus, input:focus { border-color: var(--vinotinto-medio); }
+
+        .upload-area {
+            border: 2px dashed var(--vinotinto-medio);
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #fffafa;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--vinotinto-medio);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button:hover:not(:disabled) { background-color: var(--vinotinto-oscuro); transform: translateY(-2px); }
+
+        #feed { margin-top: 40px; }
+        .post {
+            background: var(--blanco);
+            padding: 20px;
+            border-left: 6px solid var(--vinotinto-medio);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(128, 0, 32, 0.1);
+        }
+        .post-header { font-size: 13px; color: var(--vinotinto-medio); margin-bottom: 10px; border-bottom: 1px solid var(--vinotinto-claro); padding-bottom: 5px; }
+        .post-type { background: var(--vinotinto-medio); color: white; padding: 2px 8px; border-radius: 5px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2> Buzón Universitario</h2>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label>Carrera</label>
+            <input type="text" id="carrera" placeholder="Ej: Derecho">
+        </div>
+        <div class="form-group">
+            <label>Semestre</label>
+            <select id="semestre">
+                <option value="1°">1°</option>
+                <option value="2°">2°</option>
+                <option value="3°">3°</option>
+                <option value="4°">4°</option>
+                <option value="5°">5°</option>
+                <option value="6°">6°</option>
+                <option value="7°">7°</option>
+                <option value="8°">8°</option>
+                <option value="9°">9°</option>
+                <option value="10°">10°</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Tipo de mensaje</label>
+        <select id="tipo">
+            <option value="Opinión">Opinión 💬</option>
+            <option value="Sugerencia">Sugerencia 💡</option>
+            <option value="Queja">Queja ⚠️</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Tu mensaje</label>
+        <textarea id="mensaje" rows="4" placeholder="Escribe aquí tus comentarios..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Adjuntar multimedia (Opcional)</label>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <span id="fileName">📁 Seleccionar foto o video</span>
+            <input type="file" id="fileInput" hidden>
+        </div>
+    </div>
+
+    <button id="btnPublicar" onclick="publicarComentario()">Publicar en el muro</button>
+
+    <div id="feed"></div>
+</div>
+
+<script>
+    async function publicarComentario() {
+        const carrera = document.getElementById('carrera').value || "No especificada";
+        const semestre = document.getElementById('semestre').value;
+        const tipo = document.getElementById('tipo').value;
+        const mensaje = document.getElementById('mensaje').value;
+        const btn = document.getElementById('btnPublicar');
+
+        if(mensaje.trim() === "") {
+            alert("Por favor, escribe un mensaje.");
+            return;
+        }
+
+        btn.innerText = "Enviando...";
+        btn.disabled = true;
+
+        // DATOS PARA FORMSPREE
+        const urlFormspree = "https://formspree.io/f/xlgzqdpy";
+        const datos = {
+            Carrera: carrera,
+            Semestre: semestre,
+            Tipo: tipo,
+            Mensaje: mensaje
+        };
+
+        try {
+            const response = await fetch(urlFormspree, {
+                method: 'POST',
+                body: JSON.stringify(datos),
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                // Agregar visualmente al muro local antes de limpiar
+                const feed = document.getElementById('feed');
+                const post = document.createElement('div');
+                post.className = 'post';
+                post.innerHTML = `
+                    <div class="post-header"><span class="post-type">${tipo}</span> <strong>${carrera}</strong> • ${semestre}</div>
+                    <div class="post-content">${mensaje}</div>
+                    <small style="color:#aaa;">Enviado correctamente</small>
+                `;
+                feed.prepend(post);
+
+                alert("¡Mensaje enviado con éxito! Podrás verlo en el panel de control.");
+                limpiarFormulario();
+            } else {
+                alert("Error al enviar. Verifica tu cuenta de Formspree.");
+            }
+        } catch (error) {
+            alert("Error de conexión. Revisa tu internet.");
+        } finally {
+            btn.innerText = "Publicar en el muro";
+            btn.disabled = false;
+        }
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('mensaje').value = "";
+        document.getElementById('carrera').value = "";
+        document.getElementById('fileInput').value = "";
+        document.getElementById('fileName').innerText = "📁 Seleccionar foto o video";
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        const name = this.files[0] ? this.files[0].name : "📁 Seleccionar foto o video";
+        document.getElementById('fileName').innerText = name;
+    });
+</script>
+
+</body>
+</html>
